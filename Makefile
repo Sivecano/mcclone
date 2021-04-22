@@ -1,5 +1,5 @@
 compiler = clang++
-linkflags = -lSDL2
+linkflags = -lSDL2 -lGLEW -lGL
 files = main.cpp
 compilerflags = -O2
 outfile = gl_template
