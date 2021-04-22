@@ -1,6 +1,6 @@
+#include "GL/glew.h"
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_opengl.h"
-#include "GL/glew.h"
 
 #define WIDTH 800
 #define HEIGHT 400

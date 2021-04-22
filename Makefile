@@ -5,11 +5,11 @@ compilerflags = -O2
 outfile = gl_template
 
 
-build: $(files) MakeFile
-	$(compiler) files -o $(outfile) $(linkflags) $(compilerflags)
+build: $(files) Makefile
+	$(compiler) $(files) -o $(outfile) $(linkflags) $(compilerflags)
 
 run : build
-	$(outfile)
+	./$(outfile)
 
 clean : 
 	rm $(outfile)
