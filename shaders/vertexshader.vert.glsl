@@ -1,8 +1,11 @@
 #version 460 core
 
-in vec2 position;
+in float type;
+out float dtype;
 
 void main()
 {
-    glPosition = vec4(position, 0, 1);
+    dtype = type;
+    gl_Position = vec4((gl_VertexID % 3) / 1.5 - .7, floor(gl_VertexID / 3) - .55, 0, 1.);
+
 }

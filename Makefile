@@ -16,4 +16,4 @@ build:
 	ln -sr ./shaders ./build/shaders 
 
 clean : 
-	rm $(outfile)
+	rm build/$(outfile)

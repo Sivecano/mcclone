@@ -8,6 +8,8 @@ SDL_GLContext con;
 int width;
 int height;
 GLuint shaderprogramm;
+GLuint vbo;
+GLuint vao;
 
 void render_init(SDL_Window* win)
 {
@@ -49,6 +51,28 @@ void render_init(SDL_Window* win)
                                     "shaders/fragmentshader.frag.glsl",
                                     "shaders/geometryshader.geo.glsl");
 
+    //glPointSize(4);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    glGenBuffers(1, &vbo);
+
+    float points[] = {
+            1, 2, 3, 4, 5, 6
+    };
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    GLint posAttrib = glGetAttribLocation(shaderprogramm, "type");
+    glEnableVertexAttribArray(posAttrib);
+    glVertexAttribPointer(posAttrib, 1, GL_UNSIGNED_BYTE, GL_FALSE, 0, NULL);
+
+
+
 }
 
 void render_quit()
@@ -60,8 +84,14 @@ void render_quit()
 
 void render(SDL_Window* win)
 {
+
     glClear(GL_COLOR_BUFFER_BIT);
+
     glUseProgram(shaderprogramm);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindVertexArray(vao);
+
+    glDrawArrays(GL_POINTS, 0, 6);
 
 
     SDL_GL_SwapWindow(win);
