@@ -57,7 +57,7 @@ void render_init(SDL_Window* win)
 
     glGenBuffers(1, &vbo);
 
-    float points[] = {
+    int points[] = {
             1, 2, 3, 4, 5, 6
     };
 
@@ -69,7 +69,7 @@ void render_init(SDL_Window* win)
 
     GLint posAttrib = glGetAttribLocation(shaderprogramm, "type");
     glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 1, GL_UNSIGNED_BYTE, GL_FALSE, 0, NULL);
+    glVertexAttribPointer(posAttrib, 1, GL_INT, GL_FALSE, 0, NULL);
 
 
 
