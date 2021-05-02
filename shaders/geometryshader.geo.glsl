@@ -7,6 +7,7 @@ out vec2 texcoord;
 out float light;
 in uint type[];
 in uint facemask[];
+
 const int tris[] ={
     0, 1, 2,
     1, 3, 2,
@@ -65,14 +66,15 @@ void main()
                                     (rotationMatrix(vec3(.2, 1, .1), time / 500.) *
                                     (vec4((2 * x - 1)*d, (2 * y - 1)*d, (2 * z - 1)*d, 1.)));
             }
+
     float tlight;
     for (int i = 0; i < 12; i++)
     {
         if ((uint(facemask[0] / pow(2, floor(i / 2))) % 2) == 0) continue;
 
         //TODO: lighting
-        //if (i % 2 == 0)
-        //    tlight= abs(dot(cross(normalize(corners[tris[3*i + 1]].xyz - corners[tris[3*i]].xyz), normalize(corners[tris[3*i + 2]].xyz - corners[tris[3*i]].xyz)), lightdir));
+        // if (i % 2 == 0)
+        //     tlight= abs(dot(cross(normalize(corners[tris[3*i + 1]].xyz - corners[tris[3*i]].xyz), normalize(corners[tris[3*i + 2]].xyz - corners[tris[3*i]].xyz)), lightdir));
 
         for (int j = 0; j < 3; j++)
         {
@@ -90,40 +92,4 @@ void main()
         EndPrimitive();
     }
 
-
-/*
-    // ctype = dtype[0];
-    texcoord = vec2((dtype[0] - 1.) / 16., 1);
-    gl_Position = gl_in[0].gl_Position + vec4(-0.1, -0.0, 0.0, 0.0);
-    EmitVertex();
-
-    // ctype = dtype[0];
-
-    texcoord = vec2(dtype[0] / 16., 1);
-    gl_Position = gl_in[0].gl_Position + vec4(.1, 0.0, 0.0, 0.0);
-    EmitVertex();
-
-    // ctype = dtype[0];
-    texcoord = vec2(dtype[0] / 16., 0);
-    gl_Position = gl_in[0].gl_Position + vec4(.1, 0.2, 0.0, 0.0);
-    EmitVertex();
-
-    EndPrimitive();
-
-    // ctype = dtype[0];
-    texcoord = vec2(dtype[0] / 16., 0);
-    gl_Position = gl_in[0].gl_Position + vec4(.1, 0.2, 0.0, 0.0);
-    EmitVertex();
-
-    // ctype = dtype[0];
-    texcoord = vec2((dtype[0] - 1.)/16., .0);
-    gl_Position = gl_in[0].gl_Position + vec4(-.1, 0.2, 0.0, 0.0);
-    EmitVertex();
-
-    // ctype = dtype[0];
-    texcoord = vec2(dtype[0] / 16. - 1. / 16., 1);
-    gl_Position = gl_in[0].gl_Position + vec4(-0.1, -0.0, 0.0, 0.0);
-    EmitVertex();
-
-    EndPrimitive();*/
 }

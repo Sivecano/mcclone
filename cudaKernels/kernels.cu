@@ -43,7 +43,6 @@ __global__ void calculate_cube_facemask(uint8_t* data)
     if (y < 15) if (data[x + 16 * (y + 1) + 256*z] != 0) out &= ~32; // top
     if (z < 15) if (data[x + 16 * y + 256*(z + 1)] != 0) out &= ~4;  // back
 
-    if ((x == 0) && (y == 0) && (z == 0)) printf("from cuda: %i", out);
     data[4096 + x + 16 * y + 256 * z] = out;
 }
 
