@@ -35,13 +35,13 @@ __global__ void calculate_cube_facemask(uint8_t* data)
     uint y = blockIdx.y * blockDim.y + threadIdx.y;
     uint z = blockIdx.z * blockDim.z + threadIdx.z;
 
-    if (x > 0) if (data[(x - 1) + 16 * y + 256*z] != 0) out &= ~8;     // left
-    if (y > 0) if (data[x + 16 * (y - 1) + 256*z] != 0) out &= ~1;   // bottom
-    if (z > 0) if (data[x + 16 * y + 256*(z - 1)] != 0) out &= ~16;  //front
+    if (x > 0) if (data[(x - 1) + 16 * y + 256*z] == 0) out &= ~8;     // left
+    if (y > 0) if (data[x + 16 * (y - 1) + 256*z] == 0) out &= ~1;   // bottom
+    if (z > 0) if (data[x + 16 * y + 256*(z - 1)] == 0) out &= ~16;  //front
 
-    if (x < 15) if (data[(x + 1) + 16 * y + 256*z] != 0) out &= ~2;    // right
-    if (y < 15) if (data[x + 16 * (y + 1) + 256*z] != 0) out &= ~32; // top
-    if (z < 15) if (data[x + 16 * y + 256*(z + 1)] != 0) out &= ~4;  // back
+    if (x < 15) if (data[(x + 1) + 16 * y + 256*z] == 0) out &= ~2;    // right
+    if (y < 15) if (data[x + 16 * (y + 1) + 256*z] == 0) out &= ~32; // top
+    if (z < 15) if (data[x + 16 * y + 256*(z + 1)] == 0) out &= ~4;  // back
 
     data[4096 + x + 16 * y + 256 * z] = out;
 }

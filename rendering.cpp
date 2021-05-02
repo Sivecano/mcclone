@@ -136,7 +136,7 @@ void render(SDL_Window* win)
     glBindBuffer(GL_ARRAY_BUFFER, block_buffer);
     glBindVertexArray(vertex_array);
 
-    glDrawArrays(GL_POINTS, 0, 6);
+    glDrawArrays(GL_POINTS, 0, 4096);
 
 
     SDL_GL_SwapWindow(win);
