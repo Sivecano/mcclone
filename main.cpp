@@ -1,10 +1,11 @@
 #include "GL/glew.h"
 #include "SDL2/SDL.h"
+#include "SDL2/SDL_image.h"
 #include "shaders.h"
 #include "rendering.h"
 
-#define WIDTH 800
-#define HEIGHT 400
+#define WIDTH 1280
+#define HEIGHT 720
 
 
 
@@ -15,6 +16,12 @@ int main()
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
         SDL_Log("we fucked up at init: %s", SDL_GetError());
+        return 1;
+    }
+
+    if (IMG_Init(IMG_INIT_PNG) < 0)
+    {
+        SDL_Log("couldn't initialize SDL_image: %s", IMG_GetError());
         return 1;
     }
 

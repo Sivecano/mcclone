@@ -3,8 +3,11 @@
 #define prec float
 
 out vec4 FragColor;
-in vec4 texcoord;
-in float ctype;
+in vec2 texcoord;
+in float light;
+
+uniform sampler2D tex;
+
 
 float QqhToRgb(float q1, float q2, float hue)
 {
@@ -45,9 +48,12 @@ vec3 HlsToRgb(float h, float l, float s)
 
 void main()
 {
-    FragColor = vec4(ctype / 6., 0,0, 1.);
+    FragColor = texture(tex, texcoord.xy); //vec4(ctype / 6., 0,0, 1.);
+    //FragColor.xyz *= light; //TODO: lighting
+    if (FragColor.w < 0.00001)
+        discard;
     return;
-    /*
+
     vec2 pos = 2 * texcoord.xy - vec2(1, 1);
 
 
@@ -90,5 +96,5 @@ void main()
     }
 
 
-    FragColor = vec4(HlsToRgb(float(path * path / 100) *1.5, (i == max_i)? 0 :.5, .5), 1);*/
+    FragColor = vec4(HlsToRgb(float(path * path / 100) *1.5, (i == max_i)? 0 :.5, .5), 1);
 }

@@ -3,13 +3,22 @@
 //
 #include "rendering.h"
 #include "gl_util/shaders.h"
+#include "SDL2/SDL_image.h"
+#include "ChunkSystem.h"
+#include "Camera.h"
+#include "cudaKernels/kernels.cuh"
 
 SDL_GLContext con;
 int width;
 int height;
-GLuint shaderprogramm;
-GLuint vbo;
-GLuint vao;
+GLuint block_shader;
+
+GLuint block_buffer; // the first 4096 elements are the block types within the chunks while the other 4096 are the block face masks
+GLuint vertex_array;
+GLuint block_texture_atlas;
+
+
+
 
 void render_init(SDL_Window* win)
 {
@@ -38,6 +47,7 @@ void render_init(SDL_Window* win)
         exit(1);
     }
 
+
     SDL_GetWindowSize(win, &width, &height);
 
     glViewport(0, 0, width, height);
@@ -47,54 +57,99 @@ void render_init(SDL_Window* win)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(.6f, .6f, 1.0f, 1.0f);
 
-    shaderprogramm = shader_program("shaders/vertexshader.vert.glsl",
-                                    "shaders/fragmentshader.frag.glsl",
-                                    "shaders/geometryshader.geo.glsl");
+    block_shader = shader_program("shaders/vertexshader.vert.glsl",
+                                  "shaders/fragmentshader.frag.glsl",
+                                  "shaders/geometryshader.geo.glsl");
 
     //glPointSize(4);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    glGenBuffers(1, &vbo);
+    glGenTextures(1, &block_texture_atlas);
+    SDL_Surface* tex = IMG_Load("./textures/tests.png");
+    if (tex == NULL)
+    {
+        SDL_Log("image didn't load: %s", IMG_GetError());
+        exit(1);
+    }
 
-    int points[] = {
-            1, 2, 3, 4, 5, 6
+    glBindTexture(GL_TEXTURE_2D, block_texture_atlas);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glEnable(GL_DEPTH_TEST);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex->w, tex->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex->pixels);
+
+    SDL_FreeSurface(tex);
+
+
+    glGenBuffers(1, &block_buffer);
+
+    unsigned char points[4096] = {
+            6, 2, 3, 5, 4, 1
     };
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+    memset(points + 6, 0, 4090);
 
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, block_buffer);
+    glBufferData(GL_ARRAY_BUFFER, 8192, NULL, GL_STREAM_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, 6, points);
 
-    GLint posAttrib = glGetAttribLocation(shaderprogramm, "type");
+    glGenVertexArrays(1, &vertex_array);
+    glBindVertexArray(vertex_array);
+
+    GLint posAttrib = glGetAttribLocation(block_shader, "ftype");
     glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 1, GL_INT, GL_FALSE, 0, NULL);
+    glVertexAttribIPointer(posAttrib, 1, GL_UNSIGNED_BYTE, 0, NULL);
+
+    posAttrib = glGetAttribLocation(block_shader, "ffacemask");
+    glEnableVertexAttribArray(posAttrib);
+    glVertexAttribIPointer(posAttrib, 1, GL_UNSIGNED_BYTE, 0, (void*)4096);
+
+    cudainit();
+    register_blockbuffer(block_buffer);
 
 
 
 }
 
-void render_quit()
-{
+void render_quit() {
+    unregister_blockbuffer();
     SDL_GL_DeleteContext(con);
-
 }
-
 
 void render(SDL_Window* win)
 {
+    static uint32_t last;
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    //SDL_Log("%i", SDL_GetTicks() - last);
+    last = SDL_GetTicks();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glUniform3f(glGetUniformLocation(block_shader, "chunkpos"), 1, .5, 0.7);
+    glUniform1i(glGetUniformLocation(block_shader, "time"), SDL_GetTicks());
 
-    glUseProgram(shaderprogramm);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBindVertexArray(vao);
+    cube_facemask();
+    glUseProgram(block_shader);
+    glBindBuffer(GL_ARRAY_BUFFER, block_buffer);
+    glBindVertexArray(vertex_array);
 
     glDrawArrays(GL_POINTS, 0, 6);
 
 
     SDL_GL_SwapWindow(win);
+}
+
+void renderChunk(Camera cam, Chunk chunk)
+{
+    glBindBuffer(GL_ARRAY_BUFFER, block_buffer);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, 4096, chunk.blockids);
+    cube_facemask();
+    //glVertexAttribPointer()
+
+
 }
 
 

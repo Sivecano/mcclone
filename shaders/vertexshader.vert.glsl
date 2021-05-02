@@ -1,11 +1,24 @@
 #version 460 core
 
-in float type;
-out float dtype;
+
+
+in uint ftype;
+in uint ffacemask;
+
+out uint facemask;
+out uint type;
+
+uniform vec3 chunkpos;
+uniform vec3 campos;
+
+
 
 void main()
 {
-    dtype = type;
-    gl_Position = vec4((gl_VertexID % 3) / 1.5 - .7, floor(gl_VertexID / 3) - .55, 0, 1.);
+    type = (ftype);
+    facemask = (ffacemask);
+
+    //TODO: use glVertexID to align within chunk
+    gl_Position = vec4(vec3((gl_VertexID % 64) - 4, floor(gl_VertexID / 64), 0) + chunkpos - campos, 1.);
 
 }

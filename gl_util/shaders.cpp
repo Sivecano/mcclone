@@ -1,4 +1,6 @@
 #include "GL/glew.h"
+#include "shaders.h"
+
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
@@ -43,7 +45,7 @@ unsigned int load_shader(const char* filename, int shadertype)
 }
 
 
-unsigned int shader_program(const char *vertShaderLoc, const char *fragShaderLoc, const char* geoShaderLoc = NULL)
+unsigned int shader_program(const char *vertShaderLoc, const char *fragShaderLoc, const char* geoShaderLoc)
 {
     unsigned int vertshader; // two shaders
     unsigned int fragshader; // two shaders
@@ -79,6 +81,30 @@ unsigned int shader_program(const char *vertShaderLoc, const char *fragShaderLoc
     }
 
     printf("shader linked successfully!\n");
-    success = 0;
+
+
     return out;
+}
+
+unsigned int compute_shader(const char *computeShaderLoc) {
+
+    unsigned int cshader = load_shader(computeShaderLoc, GL_COMPUTE_SHADER);
+    unsigned int prog = glCreateProgram();
+    glAttachShader(prog, cshader);
+    glLinkProgram(prog);
+    glDeleteShader(cshader);
+
+    GLint success; // error check same as load shader
+    glGetProgramiv(prog, GL_LINK_STATUS, &success);
+
+    if(success == GL_FALSE) {
+        char infoLog[512];
+        printf("compute shader linking didn't work: ");
+        glGetProgramInfoLog(prog, 512, nullptr, infoLog);
+        printf("%s\n", infoLog);
+        throw std::runtime_error("compute shader didn't work");
+    }
+
+    printf("compute shader linked successfully\n");
+    return prog;
 }
