@@ -5,10 +5,9 @@
 #ifndef MCCLONE_KERNELS_H
 #define MCCLONE_KERNELS_H
 
-#include <stdexcept>
 
 void cudainit();
-void register_blockbuffer(uint buffer);
+void register_blockbuffer(int buffer);
 void unregister_blockbuffer();
 void cube_facemask();
 

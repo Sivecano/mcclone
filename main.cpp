@@ -3,11 +3,15 @@
 #include "SDL2/SDL_image.h"
 #include "shaders.h"
 #include "rendering.h"
+#include "Camera.h"
+#include "ChunkSystem.h"
+#include "glm/glm.hpp"
 
 #define WIDTH 1280
 #define HEIGHT 720
 
-
+Camera playcam;
+const uint8_t* keystate = SDL_GetKeyboardState(NULL);
 
 int main()
 {
@@ -35,8 +39,16 @@ int main()
         exit(1);
     }
 
-    render_init(win);
 
+    render_init(win);
+    Chunk basechunk;
+    playcam.direction = glm::vec3(0, 0, 1);
+    playcam.FOV = 90;
+
+
+    for (int i = 0; i < 16; i++)
+        for (int j = 0; j < 16; j++)
+            basechunk.blockids[i + 256 * j] = 1;
 
     bool running = true;
 
@@ -49,7 +61,14 @@ int main()
                 running = false;
         }
 
+        playcam.position += glm::vec3(0.1 * (keystate[SDL_SCANCODE_D] - keystate[SDL_SCANCODE_A]),
+                                      0.1 * (keystate[SDL_SCANCODE_SPACE] - keystate[SDL_SCANCODE_LSHIFT]),
+                                      0.1 * (keystate[SDL_SCANCODE_W] - keystate[SDL_SCANCODE_S]));
+
         render(win);
+        //renderChunk(playcam, basechunk);
+
+        //SDL_GL_SwapWindow(win);
 
     }
 

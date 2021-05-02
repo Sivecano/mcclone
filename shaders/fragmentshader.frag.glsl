@@ -52,7 +52,7 @@ void main()
     // FragColor.xyz *= light; //TODO: lighting
     if (FragColor.w < 0.00001)
         discard;
-    //return;
+    return;
 
     vec2 pos = 2 * texcoord.xy - vec2(1, 1);
 

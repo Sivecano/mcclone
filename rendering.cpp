@@ -55,13 +55,12 @@ void render_init(SDL_Window* win)
     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_DEPTH_TEST);
     glClearColor(.6f, .6f, 1.0f, 1.0f);
 
     block_shader = shader_program("shaders/vertexshader.vert.glsl",
                                   "shaders/fragmentshader.frag.glsl",
                                   "shaders/geometryshader.geo.glsl");
-
-    //glPointSize(4);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -69,7 +68,7 @@ void render_init(SDL_Window* win)
     SDL_Surface* tex = IMG_Load("./textures/tests.png");
     if (tex == NULL)
     {
-        SDL_Log("image didn't load: %s", IMG_GetError());
+        SDL_Log("texture didn't load: %s", IMG_GetError());
         exit(1);
     }
 
@@ -79,7 +78,6 @@ void render_init(SDL_Window* win)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glEnable(GL_DEPTH_TEST);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex->w, tex->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex->pixels);
 
@@ -91,7 +89,6 @@ void render_init(SDL_Window* win)
     unsigned char points[4096] = {
             6, 2, 3, 5, 4, 1
     };
-
     memset(points + 6, 0, 4090);
 
     glBindBuffer(GL_ARRAY_BUFFER, block_buffer);
@@ -111,9 +108,6 @@ void render_init(SDL_Window* win)
 
     cudainit();
     register_blockbuffer(block_buffer);
-
-
-
 }
 
 void render_quit() {
@@ -128,7 +122,7 @@ void render(SDL_Window* win)
     //SDL_Log("%i", SDL_GetTicks() - last);
     last = SDL_GetTicks();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glUniform3f(glGetUniformLocation(block_shader, "chunkpos"), 1, .5, 0.7);
+    glUniform3f(glGetUniformLocation(block_shader, "chunkpos"), -1, .5, 0.7);
     glUniform1i(glGetUniformLocation(block_shader, "time"), SDL_GetTicks());
 
     cube_facemask();
@@ -144,9 +138,15 @@ void render(SDL_Window* win)
 
 void renderChunk(Camera cam, Chunk chunk)
 {
+    glUseProgram(block_shader);
+    glUniform3f(glGetUniformLocation(block_shader, "chunkpos"), chunk.chunkpos.x, chunk.chunkpos.y, chunk.chunkpos.z);
+    glUniform3f(glGetUniformLocation(block_shader, "campos"), cam.position.x, cam.position.y, cam.position.z);
+    glUniform3f(glGetUniformLocation(block_shader, "camdir"), cam.direction.x, cam.direction.y, cam.direction.z);
+    glBindVertexArray(vertex_array);
     glBindBuffer(GL_ARRAY_BUFFER, block_buffer);
     glBufferSubData(GL_ARRAY_BUFFER, 0, 4096, chunk.blockids);
     cube_facemask();
+    glDrawArrays(GL_POINTS, 0, 4096);
     //glVertexAttribPointer()
 
 

@@ -55,22 +55,21 @@ void main()
     float d = 0.1 / gl_in[0].gl_Position.z;
     vec4 origin = gl_in[0].gl_Position - vec4(d, d, d, 0);
 
-    vec4 corners[12];
+    vec4 corners[8];
 
     for (int x = 0; x < 2; x++)
         for (int y = 0; y < 2; y++)
             for (int z = 0; z < 2; z++)
-            {
                 corners[x + 2*z + 4*y] = gl_in[0].gl_Position  +
                                         vec4(1, 16./9., 1, 1) *
-                                    (rotationMatrix(vec3(.2, 1, .1), time / 500.) *
+                                    (rotationMatrix(vec3(-.5, 1, 0), time/500.) *
                                     (vec4((2 * x - 1)*d, (2 * y - 1)*d, (2 * z - 1)*d, 1.)));
-            }
+
 
     float tlight;
     for (int i = 0; i < 12; i++)
     {
-        if ((uint(facemask[0] / pow(2, floor(i / 2))) % 2) == 0) continue;
+        if (((facemask[0] >> uint(i / 2)) & uint(1)) == 0) continue;
 
         //TODO: lighting
         // if (i % 2 == 0)

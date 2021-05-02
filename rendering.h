@@ -7,10 +7,12 @@
 #include "GL/glew.h"
 #include "SDL2/SDL.h"
 #include "shaders.h"
+#include "Camera.h";
+#include "ChunkSystem.h";
 
 void render(SDL_Window* win);
 void render_init(SDL_Window* win);
 void render_quit();
-
+void renderChunk(Camera cam, Chunk chunk);
 
 #endif //MCCLONE_RENDERING_H
