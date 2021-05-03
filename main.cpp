@@ -43,9 +43,10 @@ int main()
     render_init(win);
     Chunk basechunk;
     basechunk.chunkpos = glm::vec3(0,0,0);
-    playcam.direction = glm::vec3(0, -.5, 1);
+    playcam.direction = glm::vec3(0, 0, 1);
     playcam.position = glm::vec3(0,0,-1);
-    playcam.FOV = 16.;
+    playcam.FOV = 2;
+    playcam.zoom = 1;
 
 
     for (int i = 0; i < 16; i++)
@@ -60,14 +61,43 @@ int main()
         SDL_Event e;
         while(SDL_PollEvent(&e))
         {
-            if (e.type == SDL_QUIT)
-                running = false;
+            switch (e.type)
+            {
+                case SDL_QUIT:
+                    running = false;
+                    break;
+
+                case SDL_MOUSEBUTTONDOWN:
+                    SDL_SetRelativeMouseMode(SDL_TRUE);
+                    break;
+
+                case SDL_KEYDOWN:
+                    if (e.key.keysym.sym == SDLK_ESCAPE)
+                        SDL_SetRelativeMouseMode(SDL_FALSE);
+                    break;
+
+                case SDL_MOUSEMOTION:
+                    if (SDL_GetRelativeMouseMode() == SDL_TRUE) {
+                        playcam.direction.x += e.motion.xrel / 100.;
+                        playcam.direction.y += e.motion.yrel / 100.;
+                    }
+                    break;
+
+                case SDL_MOUSEWHEEL:
+                    playcam.zoom += e.wheel.y / 100;
+
+
+            };
+
+
         }
 
         playcam.position += glm::vec3(0.1 * (keystate[SDL_SCANCODE_D] - keystate[SDL_SCANCODE_A]),
                                       0.1 * (keystate[SDL_SCANCODE_SPACE] - keystate[SDL_SCANCODE_LSHIFT]),
                                       0.1 * (keystate[SDL_SCANCODE_W] - keystate[SDL_SCANCODE_S]));
-        playcam.FOV += keystate[SDL_SCANCODE_E] - keystate[SDL_SCANCODE_Q];
+        playcam.FOV += 0.01 * (keystate[SDL_SCANCODE_E] - keystate[SDL_SCANCODE_Q]);
+        playcam.FOV = fmin(3.14159, playcam.FOV);
+        playcam.FOV = fmax(0.1, playcam.FOV);
 
         SDL_Log("x: %f, y: %f, z: %f, fov: %f", playcam.position.x, playcam.position.y, playcam.position.z, playcam.FOV);
 

@@ -9,22 +9,22 @@ in uint type[];
 in uint facemask[];
 
 const int tris[] ={
-    0, 1, 2,
+    0, 1, 2, // bottom
     1, 3, 2,
 
-    0, 1, 4,
+    0, 1, 4, // right
     1, 5, 4,
 
-    1, 3, 5,
+    1, 3, 5, // back
     3, 7, 5,
 
-    3, 2, 7,
+    3, 2, 7, // left
     2, 6, 7,
 
-    2, 0, 6,
+    2, 0, 6, // front
     0, 4, 6,
 
-    4, 5, 7,
+    4, 5, 7, // top
     4, 7, 6
     };
 
@@ -33,6 +33,7 @@ const vec3 lightdir = normalize(vec3(0,0, .1));
 uniform vec3 campos;
 uniform vec3 camdir;
 uniform float fov;
+uniform float zoom;
 
 uniform int time;
 
@@ -49,10 +50,26 @@ mat4 rotationMatrix(vec3 axis, float angle)
     0.0,                                0.0,                                0.0,                                1.0);
 }
 
+mat4 perpectivematrix(float fov, float distance, float depth)
+{
+    float n = distance;
+    float r = tan(fov / 2) * distance;
+    float f = distance + depth;
+    float t = r * 9./16.;
+
+    return mat4(n/r, 0, 0, 0,
+                0, n/t, 0, 0,
+                0, 0, -(f + n)/(depth), (2*f*n)/(depth),
+                0, 0, 1, 0
+                );
+}
+
 void main()
 {
-    //if (type[0] == 0)
-    //    return;
+    float fovx = fov/2;
+    float fovy = asin(sin(fovx)* 16./ 9.);
+    if (type[0] == 0) return;
+
     vec2 blocktex = vec2((type[0]) % 48, floor((type[0]) / 48) * 16) / 16.;
     vec4 corners[8];
 
@@ -63,15 +80,24 @@ void main()
                 corners[x + 2*z + 4*y] = (gl_in[0].gl_Position)  + vec4(x, y, z, 0) - vec4(0.5, 0.5, 0.5, 0);
 
 
-    //vector from camera to top right corner of viewrect
-    vec4 viewvec = vec4(fov / 2., fov * 9./32., 32., 1.);
     // transform cube vertex to screenspace coordinates
     for (int i = 0; i < 8; i++)
     {
         corners[i] -= vec4(campos, 0);
-        //corners[i] = rotationMatrix(vec3(0, 1, 0), asin(dot(vec3(0, 0, 1), normalize(vec3(camdir.x, 0, camdir.z))))) * corners[i];
-        //corners[i] = rotationMatrix(vec3(0, 1, 0), asin(dot(vec3(0, 0, 1), normalize(vec3(0, camdir.y, camdir.z))))) * corners[i];
-        corners[i] /= viewvec;
+        corners[i].xyz = inverse(mat3(normalize(cross(vec3(0,1,0), camdir)), vec3(0, 1, 0), normalize(camdir))) * corners[i].xyz;
+
+        corners[i] = perpectivematrix(fov, 1 / tan(fov / 2), 400) * corners[i];
+        corners[i].z *= -1;
+        //corners[i].xyz /= corners[i].w;
+
+        //corners[i].xy /= corners[i].z * tan(fovx);
+        //corners[i].z = ;
+        //corners[i].y *= 16./9.;
+        //corners[i].z /= tan(fovx);
+        //corners[i].z -= tan(fovx);
+        //-((2*dist + debth) / debth + 2*dist*debth / (debth * corners[i].z));
+        // corners[i].z = 1 / tan(fov/2);
+        // corners[i].y *= 9./16.;
     }
 
 
@@ -79,11 +105,10 @@ void main()
     float tlight;
     for (int i = 0; i < 12; i++)
     {
-        //if (((facemask[0] >> uint(i / 2)) & uint(1)) == 0) continue;
+        if ((uint(facemask[0] / pow(2, floor(i / 2))) % 2) == 0) continue;
 
         //TODO: lighting
-        if (i % 2 == 0)
-            tlight= abs(dot(cross(normalize(corners[tris[3*i + 1]].xyz - corners[tris[3*i]].xyz), normalize(corners[tris[3*i + 2]].xyz - corners[tris[3*i]].xyz)), lightdir));
+        //if (i % 2 == 0) tlight= abs(dot(cross(normalize(corners[tris[3*i + 1]].xyz - corners[tris[3*i]].xyz), normalize(corners[tris[3*i + 2]].xyz - corners[tris[3*i]].xyz)), lightdir));
 
         for (int j = 0; j < 3; j++)
         {

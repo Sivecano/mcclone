@@ -49,7 +49,7 @@ vec3 HlsToRgb(float h, float l, float s)
 void main()
 {
     FragColor = texture(tex, texcoord.xy); //vec4(ctype / 6., 0,0, 1.);
-    FragColor.xyz *= light; //TODO: lighting
+    //FragColor.xyz *= light; //TODO: lighting
     if (FragColor.w < 0.00001)
         discard;
     return;

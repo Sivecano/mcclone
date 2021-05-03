@@ -11,7 +11,7 @@ cudaGraphicsResource_t blockbuffer;
 
 __device__ inline unsigned int bindex(unsigned int x, unsigned int y, unsigned int z)
 {
-    return x + 16 * y + 256 * z;
+    return x + 16 * z + 256 * y;
 }
 
 /**
@@ -21,7 +21,9 @@ __device__ inline unsigned int bindex(unsigned int x, unsigned int y, unsigned i
  *  |      | |
  *  |      | |
  *  |______|/
- *
+ *  /\
+ *  | y
+ *  -->x
  *  bitmapping: (from least to most significant bit)
  *
  *  0: bottom
@@ -43,14 +45,14 @@ __global__ void calculate_cube_facemask(uint8_t* data)
     unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
     unsigned int z = blockIdx.z * blockDim.z + threadIdx.z;
 
-    if (x > 0) if (data[bindex(x - 1, y, z)] != 0) out &= ~8;      // left
+    if (x > 0) if (data[bindex(x - 1, y, z)] != 0) out &= ~16;      // left
     if (y > 0) if (data[bindex(x, y - 1, z)] != 0) out &= ~1;      // bottom
-    if (z > 0) if (data[bindex(x, y, z - 1)] != 0) out &= ~16;      // front // what happenes if u acess data out of chunk?????? nothing... you just access another part of the array
+    if (z > 0) if (data[bindex(x, y, z - 1)] != 0) out &= ~2;      // front // what happenes if u acess data out of chunk?????? nothing... you just access another part of the array
 // oh ic kk
 //oh, you mean outside chunk? that's why we have the first "if". we don't access that
-    if (x < 15) if (data[bindex(x + 1, y, z)] != 0) out &= ~2;     // right
+    if (x < 15) if (data[bindex(x + 1, y, z)] != 0) out &= ~4;     // right
     if (y < 15) if (data[bindex(x, y + 1, z)] != 0) out &= ~32;    // top
-    if (z < 15) if (data[bindex(x, y, z + 1)] != 0) out &= ~4;    // back
+    if (z < 15) if (data[bindex(x, y, z + 1)] != 0) out &= ~8;    // back
 
     //printf("x: %i, y: %i, z: %i\n", x, y, z);
 
