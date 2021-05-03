@@ -19,6 +19,6 @@ void main()
     facemask = (ffacemask);
 
     //TODO: use glVertexID to align within chunk
-    gl_Position = vec4(vec3((gl_VertexID % 256) , floor(gl_VertexID / 64), 0) + chunkpos - campos, 1.);
+    gl_Position = vec4(vec3((gl_VertexID % 256) , floor(gl_VertexID / 64), 0) + chunkpos - campos + vec3(-1, .5, .7), 1.);
 
 }

@@ -138,10 +138,13 @@ void render(SDL_Window* win)
 
 void renderChunk(Camera cam, Chunk chunk)
 {
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glUseProgram(block_shader);
     glUniform3f(glGetUniformLocation(block_shader, "chunkpos"), chunk.chunkpos.x, chunk.chunkpos.y, chunk.chunkpos.z);
     glUniform3f(glGetUniformLocation(block_shader, "campos"), cam.position.x, cam.position.y, cam.position.z);
     glUniform3f(glGetUniformLocation(block_shader, "camdir"), cam.direction.x, cam.direction.y, cam.direction.z);
+    glUniform1i(glGetUniformLocation(block_shader, "time"), SDL_GetTicks());
     glBindVertexArray(vertex_array);
     glBindBuffer(GL_ARRAY_BUFFER, block_buffer);
     glBufferSubData(GL_ARRAY_BUFFER, 0, 4096, chunk.blockids);

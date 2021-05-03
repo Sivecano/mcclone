@@ -42,6 +42,7 @@ int main()
 
     render_init(win);
     Chunk basechunk;
+    basechunk.chunkpos = glm::vec3(0,0,0);
     playcam.direction = glm::vec3(0, 0, 1);
     playcam.FOV = 90;
 
@@ -65,10 +66,10 @@ int main()
                                       0.1 * (keystate[SDL_SCANCODE_SPACE] - keystate[SDL_SCANCODE_LSHIFT]),
                                       0.1 * (keystate[SDL_SCANCODE_W] - keystate[SDL_SCANCODE_S]));
 
-        render(win);
-        //renderChunk(playcam, basechunk);
+        //render(win);
+        renderChunk(playcam, basechunk);
 
-        //SDL_GL_SwapWindow(win);
+        SDL_GL_SwapWindow(win);
 
     }
 
