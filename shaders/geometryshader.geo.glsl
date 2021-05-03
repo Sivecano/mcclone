@@ -51,8 +51,8 @@ mat4 rotationMatrix(vec3 axis, float angle)
 
 void main()
 {
-    if (type[0] == 0)
-        return;
+    //if (type[0] == 0)
+    //    return;
     vec2 blocktex = vec2((type[0]) % 48, floor((type[0]) / 48) * 16) / 16.;
     vec4 corners[8];
 
@@ -64,15 +64,14 @@ void main()
 
 
     //vector from camera to top right corner of viewrect
-    vec4 viewvec = vec4(fov / 2., fov * 9./32., 1., 1.);
+    vec4 viewvec = vec4(fov / 2., fov * 9./32., 32., 1.);
     // transform cube vertex to screenspace coordinates
     for (int i = 0; i < 8; i++)
     {
         corners[i] -= vec4(campos, 0);
-        //corners[i] = rotationMatrix(vec3(0, 1, 0), acos(dot(vec3(0, 0, 1), normalize(vec3(camdir.x, 0, camdir.z))))) * corners[i];
-        //corners[i] = rotationMatrix(vec3(0, 1, 0), acos(dot(vec3(0, 0, 1), normalize(vec3(0, camdir.y, camdir.z))))) * corners[i];
-        corners[i].x /= fov / 2.;
-        corners[i].y /= fov * 9. / 32.;
+        //corners[i] = rotationMatrix(vec3(0, 1, 0), asin(dot(vec3(0, 0, 1), normalize(vec3(camdir.x, 0, camdir.z))))) * corners[i];
+        //corners[i] = rotationMatrix(vec3(0, 1, 0), asin(dot(vec3(0, 0, 1), normalize(vec3(0, camdir.y, camdir.z))))) * corners[i];
+        corners[i] /= viewvec;
     }
 
 

@@ -45,13 +45,13 @@ int main()
     basechunk.chunkpos = glm::vec3(0,0,0);
     playcam.direction = glm::vec3(0, -.5, 1);
     playcam.position = glm::vec3(0,0,-1);
-    playcam.FOV = 16;
+    playcam.FOV = 16.;
 
 
     for (int i = 0; i < 16; i++)
         for (int j = 0; j < 16; j++)
             for (int k = 0; k < 16; k++)
-                basechunk.blockids[i + 16 * j + 256 * k] = 1;
+                basechunk.blockids[i + 16 * j + 256 * k] = (k==0) ? 1 : 0;
 
     bool running = true;
 
@@ -67,8 +67,9 @@ int main()
         playcam.position += glm::vec3(0.1 * (keystate[SDL_SCANCODE_D] - keystate[SDL_SCANCODE_A]),
                                       0.1 * (keystate[SDL_SCANCODE_SPACE] - keystate[SDL_SCANCODE_LSHIFT]),
                                       0.1 * (keystate[SDL_SCANCODE_W] - keystate[SDL_SCANCODE_S]));
+        playcam.FOV += keystate[SDL_SCANCODE_E] - keystate[SDL_SCANCODE_Q];
 
-        SDL_Log("x: %f, y: %f, z: %f", playcam.position.x, playcam.position.y, playcam.position.z);
+        SDL_Log("x: %f, y: %f, z: %f, fov: %f", playcam.position.x, playcam.position.y, playcam.position.z, playcam.FOV);
 
         //render(win);
         renderChunk(playcam, basechunk);

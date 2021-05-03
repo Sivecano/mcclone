@@ -144,7 +144,7 @@ void renderChunk(Camera cam, Chunk chunk)
     glUniform3f(glGetUniformLocation(block_shader, "chunkpos"), chunk.chunkpos.x, chunk.chunkpos.y, chunk.chunkpos.z);
     glUniform3f(glGetUniformLocation(block_shader, "campos"), cam.position.x, cam.position.y, cam.position.z);
     glUniform3f(glGetUniformLocation(block_shader, "camdir"), cam.direction.x, cam.direction.y, cam.direction.z);
-    glUniform1i(glGetUniformLocation(block_shader, "time"), SDL_GetTicks());
+    glUniform1f(glGetUniformLocation(block_shader, "fov"), cam.FOV);
     glBindVertexArray(vertex_array);
     glBindBuffer(GL_ARRAY_BUFFER, block_buffer);
     glBufferSubData(GL_ARRAY_BUFFER, 0, 4096, chunk.blockids);
