@@ -54,7 +54,7 @@ __global__ void calculate_cube_facemask(uint8_t* data)
 
     //printf("x: %i, y: %i, z: %i\n", x, y, z);
 
-    if ((x == -1) && (y == 0) && (z == 0)) {
+    if ((x == 16) && (y == 0) && (z == 0)) {
         printf(" curr : %i, x + 1: %i, y + 1: %i, z + 1: %i", data[bindex(x, y, z)], data[bindex(x + 1, y, z)], data[bindex(x, y+1, z)], data[bindex(x, y, z+1)]);
         printf(", x - 1: %i\t", data[bindex(x - 1, y, z)]);
         printf("out: %i\n", out);

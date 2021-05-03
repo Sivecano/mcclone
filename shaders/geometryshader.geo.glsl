@@ -30,6 +30,7 @@ const int tris[] ={
 
 const vec3 lightdir = normalize(vec3(0,0, .1));
 
+uniform vec3 campos;
 uniform vec3 camdir;
 uniform float fov;
 
@@ -50,30 +51,40 @@ mat4 rotationMatrix(vec3 axis, float angle)
 
 void main()
 {
+    if (type[0] == 0)
+        return;
     vec2 blocktex = vec2((type[0]) % 48, floor((type[0]) / 48) * 16) / 16.;
-
-    float d = 0.1 / gl_in[0].gl_Position.z;
-    vec4 origin = gl_in[0].gl_Position - vec4(d, d, d, 0);
-
     vec4 corners[8];
 
+    // generate cube vertex in global coordinates
     for (int x = 0; x < 2; x++)
         for (int y = 0; y < 2; y++)
             for (int z = 0; z < 2; z++)
-                corners[x + 2*z + 4*y] = gl_in[0].gl_Position  +
-                                        vec4(1, 16./9., 1, 1) *
-                                    (rotationMatrix(vec3(-.5, 1, 0), time/500.) *
-                                    (vec4((2 * x - 1)*d, (2 * y - 1)*d, (2 * z - 1)*d, 1.)));
+                corners[x + 2*z + 4*y] = (gl_in[0].gl_Position)  + vec4(x, y, z, 0) - vec4(0.5, 0.5, 0.5, 0);
+
+
+    //vector from camera to top right corner of viewrect
+    vec4 viewvec = vec4(fov / 2., fov * 9./32., 1., 1.);
+    // transform cube vertex to screenspace coordinates
+    for (int i = 0; i < 8; i++)
+    {
+        corners[i] -= vec4(campos, 0);
+        //corners[i] = rotationMatrix(vec3(0, 1, 0), acos(dot(vec3(0, 0, 1), normalize(vec3(camdir.x, 0, camdir.z))))) * corners[i];
+        //corners[i] = rotationMatrix(vec3(0, 1, 0), acos(dot(vec3(0, 0, 1), normalize(vec3(0, camdir.y, camdir.z))))) * corners[i];
+        corners[i].x /= fov / 2.;
+        corners[i].y /= fov * 9. / 32.;
+    }
+
 
 
     float tlight;
     for (int i = 0; i < 12; i++)
     {
-        if (((facemask[0] >> uint(i / 2)) & uint(1)) == 0) continue;
+        //if (((facemask[0] >> uint(i / 2)) & uint(1)) == 0) continue;
 
         //TODO: lighting
-        // if (i % 2 == 0)
-        //     tlight= abs(dot(cross(normalize(corners[tris[3*i + 1]].xyz - corners[tris[3*i]].xyz), normalize(corners[tris[3*i + 2]].xyz - corners[tris[3*i]].xyz)), lightdir));
+        if (i % 2 == 0)
+            tlight= abs(dot(cross(normalize(corners[tris[3*i + 1]].xyz - corners[tris[3*i]].xyz), normalize(corners[tris[3*i + 2]].xyz - corners[tris[3*i]].xyz)), lightdir));
 
         for (int j = 0; j < 3; j++)
         {
