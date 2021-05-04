@@ -3,11 +3,13 @@
 //
 #include "cuda.h"
 #include "cuda_gl_interop.h"
-#include "kernels.cuh"
+#include "bufferinterface.cuh"
 #include <stdexcept>
 #include "stdio.h"
+#include <vector>
+#include <utility>
 
-cudaGraphicsResource_t blockbuffer;
+std::vector<std::pair<unsigned int, cudaGraphicsResource_t>> buffers;
 
 __device__ inline unsigned int bindex(unsigned int x, unsigned int y, unsigned int z)
 {
@@ -72,34 +74,41 @@ void cudainit() {
     }
 }
 
-cudaGraphicsResource_t register_buffer(int buffer)
+void register_buffer(unsigned int buffer)
 {
     cudaGraphicsResource_t resource;
     cudaGraphicsGLRegisterBuffer(&resource, buffer, cudaGraphicsRegisterFlagsNone);
     cudaGraphicsMapResources(1, &resource);
-    return resource;
+    buffers.push_back(std::pair<unsigned int, cudaGraphicsResource_t>(buffer, resource));
 }
 
-void unregister_buffer(cudaGraphicsResource_t resource)
+void unregister_buffer(unsigned int buffer)
 {
-    cudaGraphicsUnmapResources(1, &resource);
-    cudaGraphicsUnregisterResource(resource);
+    cudaGraphicsResource_t resource;
+    for (auto el = buffers.begin(); el != buffers.end(); el++)
+        if ((*el).first == buffer) {
+            resource = (*el).second;
+            cudaGraphicsUnmapResources(1, &resource);
+            cudaGraphicsUnregisterResource(resource);
+            el = buffers.erase(el, el + 1);
+        }
 }
 
-void register_blockbuffer(int buffer) {
-    blockbuffer = register_buffer(buffer);
-}
-
-void unregister_blockbuffer()
+cudaGraphicsResource_t get_resource(unsigned int buffer)
 {
-    unregister_buffer(blockbuffer);
+    for (auto el = buffers.begin(); el != buffers.end(); el++)
+        if ((*el).first == buffer)
+             return (*el).second;
+
+    return NULL;
 }
 
-void cube_facemask()
+
+void cube_facemask(unsigned int blockbuffer)
 {
     void* pointer;
     size_t size;
-    cudaGraphicsResourceGetMappedPointer(&pointer, &size , blockbuffer);
+    cudaGraphicsResourceGetMappedPointer(&pointer, &size , get_resource(blockbuffer));
     cudaError_t err;
 
     dim3 block;

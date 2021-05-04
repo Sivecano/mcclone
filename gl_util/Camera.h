@@ -11,6 +11,8 @@
 struct Camera {
     glm::vec3 position;
     glm::vec3 direction;
+    float pitch;
+    float yaw;
     float FOV;
     float zoom;
 };

@@ -43,19 +43,29 @@ int main()
     render_init(win);
     Chunk basechunk;
     basechunk.chunkpos = glm::vec3(0,0,0);
-    playcam.direction = glm::vec3(0, 0, 1);
+    playcam.pitch = 0;
+    playcam.yaw = 0;
+    playcam.direction = glm::vec3(0,0, -1);
     playcam.position = glm::vec3(0,0,-1);
-    playcam.FOV = 2;
+    playcam.FOV = 0.1;
     playcam.zoom = 1;
 
 
     for (int i = 0; i < 16; i++)
         for (int j = 0; j < 16; j++)
             for (int k = 0; k < 16; k++)
-                basechunk.blockids[i + 16 * j + 256 * k] = (k==0) ? 1 : 0;
+                basechunk.blockids[i + 16 * j + 256 * k] = (k==0) ? 7 : 0;
+
+    basechunk.blockids[4 + 4 * 16 + 256] = 6;
+    basechunk.blockids[4 + 4 * 16 + 2 * 256] = 6;
+    basechunk.blockids[4 + 4 * 16 + 3 * 256] = 6;
+    basechunk.blockids[4 + 4 * 16 + 4 * 256] = 6;
+    basechunk.blockids[4 + 4 * 16 + 5 * 256] = 6;
+    basechunk.blockids[3 + 4 * 16 + 1 * 256] = 6;
+    basechunk.blockids[5 + 4 * 16 + 1 * 256] = 6;
 
     bool running = true;
-
+    //TODO: clean up input system
     while(running)
     {
         SDL_Event e;
@@ -67,19 +77,21 @@ int main()
                     running = false;
                     break;
 
-                case SDL_MOUSEBUTTONDOWN:
-                    SDL_SetRelativeMouseMode(SDL_TRUE);
-                    break;
-
-                case SDL_KEYDOWN:
+                case SDL_KEYUP:
                     if (e.key.keysym.sym == SDLK_ESCAPE)
-                        SDL_SetRelativeMouseMode(SDL_FALSE);
+                        SDL_SetRelativeMouseMode((SDL_GetRelativeMouseMode() == SDL_TRUE) ? SDL_FALSE : SDL_TRUE);
                     break;
 
                 case SDL_MOUSEMOTION:
                     if (SDL_GetRelativeMouseMode() == SDL_TRUE) {
-                        playcam.direction.x += e.motion.xrel / 100.;
-                        playcam.direction.y += e.motion.yrel / 100.;
+                        playcam.yaw -= 2 *e.motion.xrel / 1280.;
+                        playcam.pitch -= 2 *e.motion.yrel / 720.;
+                        if (playcam.pitch > 1.57)
+                            playcam.pitch = 1.57;
+                        if (playcam.pitch < -1.57)
+                            playcam.pitch = -1.57;
+                        playcam.direction = glm::normalize(glm::vec3(cos(playcam.pitch) * cos(playcam.yaw), sin(playcam.pitch), sin(playcam.yaw) * cos(playcam.pitch)));
+
                     }
                     break;
 
@@ -92,9 +104,12 @@ int main()
 
         }
 
-        playcam.position += glm::vec3(0.1 * (keystate[SDL_SCANCODE_D] - keystate[SDL_SCANCODE_A]),
-                                      0.1 * (keystate[SDL_SCANCODE_SPACE] - keystate[SDL_SCANCODE_LSHIFT]),
-                                      0.1 * (keystate[SDL_SCANCODE_W] - keystate[SDL_SCANCODE_S]));
+        playcam.position +=  glm::normalize(glm::cross(glm::vec3(0,1,0), playcam.direction - glm::vec3(0, playcam.direction.y, 0))) * (0.1f * (keystate[SDL_SCANCODE_D] - keystate[SDL_SCANCODE_A]));
+        playcam.position +=  glm::vec3(0,1,0) * (0.1f * (keystate[SDL_SCANCODE_SPACE] - keystate[SDL_SCANCODE_LSHIFT]));
+        playcam.position +=  glm::normalize(playcam.direction - glm::vec3(0,  playcam.direction.y, 0)) * (0.1f * (keystate[SDL_SCANCODE_W] - keystate[SDL_SCANCODE_S]));
+
+
+
         playcam.FOV += 0.01 * (keystate[SDL_SCANCODE_E] - keystate[SDL_SCANCODE_Q]);
         playcam.FOV = fmin(3.14159, playcam.FOV);
         playcam.FOV = fmax(0.1, playcam.FOV);

@@ -1,28 +1,49 @@
 compiler = clang++
 linkflags = -lSDL2 -lGLEW -lGL -lSDL2_image -lcudart
 directories = -I gl_util -I world_gen -I cudaKernels
-files = main.cpp gl_util/shaders.cpp rendering.cpp gl_util/Camera.cpp
 compilerflags = -O2
 outfile = mcclone
 
-cuda_files = cudaKernels/kernels.cu
 cuda_comp = nvcc
 cuda_compflags = -O2
 
-all: $(files) Makefile build cucomp
-	$(compiler) $(files) build/cuda.o -o build/$(outfile) $(linkflags) $(compilerflags) $(directories)
+objs = 	main.o \
+		gl_util/shaders.o \
+		rendering.o \
+		gl_util/Camera.o \
+		cudaKernels/bufferinterface.o \
+		cudaKernels/worldgen.o
+
+all: $(objs) Makefile build
+	$(compiler) $(objs) -o build/$(outfile) $(linkflags)
+	make oclean
+
  
 run : compile
 	(cd build && exec ./$(outfile))
 
-build:
+build: build/shaders build/textures
 	mkdir build
+
+build/shaders:
 	ln -sr ./shaders ./build/shaders
+
+build/textures:
 	ln -sr ./textures ./build/textures
 
 cucomp: $(cuda_files)
-	$(cuda_comp) $(cuda_files) -c -o build/cuda.o $(cuda_compflags)
+	$(cuda_comp) $(cuda_files) -c $(cuda_compflags)
 
-clean : 
-	rm build/$(outfile)
-	rm build/cuda.o
+%.o:	%.cu
+	$(cuda_comp) $(cuda_compflags) -c $< -o $@
+
+%.o:	%.cpp
+	$(compiler) $(compilerflags) -c $< -o $@ $(directories)
+
+oclean :
+	rm -rf *.o
+
+clean : oclean
+	rm -rf build/*
+
+

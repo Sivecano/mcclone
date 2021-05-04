@@ -1,1 +1,1 @@
-gl_template
+# A minecraft clone

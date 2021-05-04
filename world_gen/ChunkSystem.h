@@ -6,6 +6,8 @@
 #define MCCLONE_CHUNKSYSTEM_H
 #include "glm/vec3.hpp"
 
+//TODO: implement some chunk system;
+
 struct Chunk{
     Chunk* right;
     Chunk* left;
@@ -15,13 +17,14 @@ struct Chunk{
     Chunk* bottom;
     glm::vec3 chunkpos;
     unsigned char blockids[4096];
+    unsigned int buffer;
 };
+
+
 
 
 class ChunkSystem {
     Chunk* current;
-    
-
 };
 
 #endif //MCCLONE_CHUNKSYSTEM_H
