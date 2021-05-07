@@ -13,6 +13,6 @@
 void render(SDL_Window* win);
 void render_init(SDL_Window* win);
 void render_quit();
-void renderChunk(Camera cam, Chunk chunk);
+void renderChunk(Camera cam, Chunk* chunk);
 
 #endif //MCCLONE_RENDERING_H

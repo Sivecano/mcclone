@@ -5,26 +5,24 @@
 #ifndef MCCLONE_CHUNKSYSTEM_H
 #define MCCLONE_CHUNKSYSTEM_H
 #include "glm/vec3.hpp"
+#include <vector>
+#include <utility>
 
 //TODO: implement some chunk system;
 
 struct Chunk{
-    Chunk* right;
-    Chunk* left;
-    Chunk* front;
-    Chunk* back;
-    Chunk* top;
-    Chunk* bottom;
-    glm::vec3 chunkpos;
+    glm::ivec3 chunkpos;
     unsigned char blockids[4096];
     unsigned int buffer;
 };
 
 
-
-
 class ChunkSystem {
-    Chunk* current;
+public:
+    std::vector<Chunk*> chunks;
+    Chunk* getChunk(glm::ivec3 chunkpos);
+    ~ChunkSystem();
+
 };
 
 #endif //MCCLONE_CHUNKSYSTEM_H

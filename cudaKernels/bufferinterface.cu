@@ -126,5 +126,5 @@ void cube_facemask(unsigned int blockbuffer)
     err = cudaDeviceSynchronize();
     //printf("return: %s", cudaGetErrorName(err));
     if (err != CUDA_SUCCESS)
-        printf("we fucked up majorly: %s\n", cudaGetErrorString(err));
+        printf("we fucked up majorly in facemask kernel: %s\n", cudaGetErrorString(err));
 }

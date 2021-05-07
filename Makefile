@@ -12,10 +12,12 @@ objs = 	main.o \
 		rendering.o \
 		gl_util/Camera.o \
 		cudaKernels/bufferinterface.o \
-		cudaKernels/worldgen.o
+		cudaKernels/worldgen.o \
+		world_gen/ChunkSystem.o
 
 all: $(objs) Makefile
-	$(compiler) $(objs) -o build/$(outfile) $(linkflags)
+	$(compiler) $(objs) -o build/$(outfile) $(linkflags) -v
+	make oclean
 
  
 run : compile
@@ -40,7 +42,7 @@ cucomp: $(cuda_files)
 	$(compiler) $(compilerflags) -c $< -o $@ $(directories)
 
 oclean :
-	rm -rf *.o
+	rm -rf $(objs)
 
 clean : oclean
 	rm -rf build/*
