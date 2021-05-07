@@ -17,7 +17,7 @@ __global__ void generate(uint8_t* blockids, int chunkx, int chunky, int chunkz)
     unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
     unsigned int z = blockIdx.z * blockDim.z + threadIdx.z;
 
-    blockids[bindex(x, y, z)] = (x + z < y + chunky) ? 0 : 7;
+    blockids[bindex(x, y, z)] = ((2*(x + z - 16) < (y + chunky)) || (2*(16 - x + z) < (y + chunky))) ? 0 : 7;
 }
 
 
