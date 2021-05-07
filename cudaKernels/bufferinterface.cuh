@@ -7,9 +7,9 @@
 
 
 void cudainit();
-void register_blockbuffer(int buffer);
-void unregister_blockbuffer();
-void cube_facemask();
+void register_buffer(unsigned int buffer);
+void unregister_buffer(unsigned int buffer);
+void cube_facemask(unsigned int blockbuffer);
 
 
 #endif //MCCLONE_KERNELS_H

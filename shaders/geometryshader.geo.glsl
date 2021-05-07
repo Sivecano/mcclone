@@ -34,6 +34,8 @@ uniform vec3 campos;
 uniform vec3 camdir;
 uniform float fov;
 uniform float zoom;
+uniform float pitch;
+uniform float yaw;
 
 uniform int time;
 
@@ -84,7 +86,9 @@ void main()
     for (int i = 0; i < 8; i++)
     {
         corners[i] -= vec4(campos, 0);
-        corners[i].xyz = inverse(mat3(normalize(cross(vec3(0,1,0), camdir)), vec3(0, 1, 0), normalize(camdir))) * corners[i].xyz;
+        //corners[i].xyz = inverse(mat3(normalize(cross(vec3(0,1,0), camdir)), vec3(0, 1, 0), normalize(camdir))) * corners[i].xyz;
+        corners[i] = rotationMatrix(vec3(0, -1, 0), yaw + 4.7123880) * corners[i];
+        corners[i] = rotationMatrix(vec3(-1,0,0), pitch) * corners[i];
 
         corners[i] = perpectivematrix(fov, 1 / tan(fov / 2), 400) * corners[i];
         corners[i].z *= -1;
@@ -108,7 +112,7 @@ void main()
         if ((uint(facemask[0] / pow(2, floor(i / 2))) % 2) == 0) continue;
 
         //TODO: lighting
-        //if (i % 2 == 0) tlight= abs(dot(cross(normalize(corners[tris[3*i + 1]].xyz - corners[tris[3*i]].xyz), normalize(corners[tris[3*i + 2]].xyz - corners[tris[3*i]].xyz)), lightdir));
+        if (i % 2 == 0) tlight= abs(dot(cross(normalize(corners[tris[3*i + 1]].xyz - corners[tris[3*i]].xyz), normalize(corners[tris[3*i + 2]].xyz - corners[tris[3*i]].xyz)), lightdir));
 
         for (int j = 0; j < 3; j++)
         {

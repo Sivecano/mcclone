@@ -6,7 +6,7 @@
 #include "SDL2/SDL_image.h"
 #include "ChunkSystem.h"
 #include "Camera.h"
-#include "cudaKernels/kernels.cuh"
+#include "cudaKernels/bufferinterface.cuh"
 
 SDL_GLContext con;
 int width;
@@ -107,11 +107,11 @@ void render_init(SDL_Window* win)
     glVertexAttribIPointer(posAttrib, 1, GL_UNSIGNED_BYTE, 0, (void*)4096);
 
     cudainit();
-    register_blockbuffer(block_buffer);
+    register_buffer(block_buffer);
 }
 
 void render_quit() {
-    unregister_blockbuffer();
+    unregister_buffer(block_buffer);
     SDL_GL_DeleteContext(con);
 }
 
@@ -125,7 +125,7 @@ void render(SDL_Window* win)
     glUniform3f(glGetUniformLocation(block_shader, "chunkpos"), -1, .5, 0.7);
     glUniform1i(glGetUniformLocation(block_shader, "time"), SDL_GetTicks());
 
-    cube_facemask();
+    cube_facemask(block_buffer);
     glUseProgram(block_shader);
     glBindBuffer(GL_ARRAY_BUFFER, block_buffer);
     glBindVertexArray(vertex_array);
@@ -143,13 +143,15 @@ void renderChunk(Camera cam, Chunk chunk)
     glUseProgram(block_shader);
     glUniform3f(glGetUniformLocation(block_shader, "chunkpos"), chunk.chunkpos.x, chunk.chunkpos.y, chunk.chunkpos.z);
     glUniform3f(glGetUniformLocation(block_shader, "campos"), cam.position.x, cam.position.y, cam.position.z);
-    glUniform3f(glGetUniformLocation(block_shader, "camdir"), cam.direction.x, cam.direction.y, cam.direction.z);
+    glUniform3f(glGetUniformLocation(block_shader, "camdir"), cos(cam.pitch) * cos(cam.yaw), sin(cam.pitch), sin(cam.yaw) * cos(cam.pitch));
     glUniform1f(glGetUniformLocation(block_shader, "fov"), cam.FOV);
     glUniform1f(glGetUniformLocation(block_shader, "zoom"), cam.zoom);
+    glUniform1f(glGetUniformLocation(block_shader, "pitch"), cam.pitch);
+    glUniform1f(glGetUniformLocation(block_shader, "yaw"), cam.yaw);
     glBindVertexArray(vertex_array);
     glBindBuffer(GL_ARRAY_BUFFER, block_buffer);
     glBufferSubData(GL_ARRAY_BUFFER, 0, 4096, chunk.blockids);
-    cube_facemask();
+    cube_facemask(block_buffer);
     glDrawArrays(GL_POINTS, 0, 4096);
     //glVertexAttribPointer()
 
