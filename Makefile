@@ -7,6 +7,8 @@ outfile = mcclone
 cuda_comp = nvcc
 cuda_compflags = -O2
 
+		cudaKernels/bufferinterface.o \
+all: $(objs) Makefile build
 objs = 	main.o \
 		gl_util/shaders.o \
 		rendering.o \
@@ -14,7 +16,7 @@ objs = 	main.o \
 		cudaKernels/bufferinterface.o \
 		cudaKernels/worldgen.o
 
-all: $(objs) Makefile build
+all: $(objs) Makefile build/shaders build/textures
 	$(compiler) $(objs) -o build/$(outfile) $(linkflags)
 	make oclean
 
@@ -25,10 +27,10 @@ run : compile
 build: build/shaders build/textures
 	mkdir build
 
-build/shaders:
+build/shaders: build
 	ln -sr ./shaders ./build/shaders
 
-build/textures:
+build/textures: build
 	ln -sr ./textures ./build/textures
 
 cucomp: $(cuda_files)
