@@ -13,7 +13,8 @@ objs = 	main.o \
 		gl_util/Camera.o \
 		cudaKernels/bufferinterface.o \
 		cudaKernels/worldgen.o \
-		world_gen/ChunkSystem.o
+		world_gen/ChunkSystem.o \
+		Entities/Player.o \
 
 all: $(objs) Makefile
 	$(compiler) $(objs) -o build/$(outfile) $(linkflags) -v

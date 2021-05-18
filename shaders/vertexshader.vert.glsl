@@ -1,7 +1,5 @@
 #version 460 core
 
-
-
 in uint ftype;
 in uint ffacemask;
 

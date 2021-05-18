@@ -4,6 +4,7 @@
 #include "shaders.h"
 #include "rendering.h"
 #include "Camera.h"
+#include "Entities/Player.h"
 #include "ChunkSystem.h"
 #include "glm/glm.hpp"
 
@@ -43,14 +44,14 @@ int main()
 
 
     render_init(win);
-    Chunk* basechunk = world.getChunk(glm::ivec3(0,0,0));
-    basechunk->chunkpos = glm::vec3(0,0,0);
     playcam.pitch = 0;
     playcam.yaw = 0;
     playcam.direction = glm::vec3(0,0, -1);
     playcam.position = glm::vec3(0,0,-1);
     playcam.FOV = 0.1;
     playcam.zoom = 1;
+/*
+    Chunk* basechunk = world.getChunk(glm::ivec3(0,0,0));
 
     for (int i = 0; i < 16; i++)
         for (int j = 0; j < 16; j++)
@@ -63,11 +64,15 @@ int main()
     basechunk->blockids[4 + 4 * 16 + 4 * 256] = 6;
     basechunk->blockids[4 + 4 * 16 + 5 * 256] = 6;
     basechunk->blockids[3 + 4 * 16 + 1 * 256] = 6;
-    basechunk->blockids[5 + 4 * 16 + 1 * 256] = 6;
+    basechunk->blockids[5 + 4 * 16 + 1 * 256] = 6;*/
+
+    uint32_t last = 0;
 
     bool running = true;
     //TODO: clean up input system
     while(running) {
+        uint32_t ctime = SDL_GetTicks();
+
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
@@ -89,14 +94,21 @@ int main()
                         if (playcam.pitch < -1.57)
                             playcam.pitch = -1.57;
                         playcam.direction = glm::normalize(
-                                glm::vec3(cos(playcam.pitch) * cos(playcam.yaw), sin(playcam.pitch),
-                                          sin(playcam.yaw) * cos(playcam.pitch)));
+                                glm::vec3(cos(playcam.pitch) * cos(playcam.yaw),
+                                                sin(playcam.pitch),
+                                            sin(playcam.yaw) * cos(playcam.pitch)));
 
                     }
                     break;
 
                 case SDL_MOUSEWHEEL:
-                    playcam.zoom += e.wheel.y / 100;
+                    playcam.zoom += e.wheel.y / 100.f;
+                    break;
+
+                case SDL_MOUSEBUTTONDOWN:
+                    if (e.button.button == SDL_BUTTON_LEFT)
+                        world.setBlock(raycast_pos(playcam.position, playcam.direction, world), 2);
+                    break;
 
 
             };
@@ -104,30 +116,32 @@ int main()
 
         }
 
+        float speed = (2 * keystate[SDL_SCANCODE_LCTRL] + 1) * (ctime - last) * 0.02f;
+
         playcam.position += glm::normalize(
                 glm::cross(glm::vec3(0, 1, 0), playcam.direction - glm::vec3(0, playcam.direction.y, 0))) *
-                            (0.1f * (keystate[SDL_SCANCODE_D] - keystate[SDL_SCANCODE_A]));
+                            (speed * (keystate[SDL_SCANCODE_D] - keystate[SDL_SCANCODE_A]));
         playcam.position +=
-                glm::vec3(0, 1, 0) * (0.1f * (keystate[SDL_SCANCODE_SPACE] - keystate[SDL_SCANCODE_LSHIFT]));
+                glm::vec3(0, 1, 0) * (speed * (keystate[SDL_SCANCODE_SPACE] - keystate[SDL_SCANCODE_LSHIFT]));
         playcam.position += glm::normalize(playcam.direction - glm::vec3(0, playcam.direction.y, 0)) *
-                            (0.1f * (keystate[SDL_SCANCODE_W] - keystate[SDL_SCANCODE_S]));
+                            (speed * (keystate[SDL_SCANCODE_W] - keystate[SDL_SCANCODE_S]));
 
 
         playcam.FOV += 0.01 * (keystate[SDL_SCANCODE_E] - keystate[SDL_SCANCODE_Q]);
         playcam.FOV = fmin(3.14159, playcam.FOV);
         playcam.FOV = fmax(0.1, playcam.FOV);
 
-        SDL_Log("x: %f, y: %f, z: %f, fov: %f", playcam.position.x, playcam.position.y, playcam.position.z,
-                playcam.FOV);
+        //SDL_Log("x: %f, y: %f, z: %f, fov: %f", playcam.position.x, playcam.position.y, playcam.position.z, playcam.FOV);
 
         //render(win);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        for (int i = -2; i < 3; i++)
-            for (int j = -2; j < 3; j++)
-                for (int k = 0; k < 4; k++)
-                    renderChunk(playcam, world.getChunk(glm::ivec3(i, k, j)));
+        for (int i = -4; i < 5; i++)
+            for (int j = -4; j < 5; j++)
+                for (int k = -4; k < 4; k++)
+                    renderChunk(playcam, world.getChunk(glm::ivec3(i + floor(playcam.position.x / 16), k + floor(playcam.position.y / 16), j + floor(playcam.position.z / 16))));
 
         SDL_GL_SwapWindow(win);
+        last = ctime;
 
     }
     render_quit();

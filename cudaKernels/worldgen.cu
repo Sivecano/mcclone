@@ -11,13 +11,13 @@ __device__ inline unsigned int bindex(unsigned int x, unsigned int y, unsigned i
     return x + 16 * z + 256 * y;
 }
 
-__global__ void generate(uint8_t* blockids, int chunkx, int chunky, int chunkz)
+__global__ void generate(uint8_t* blockids, int64_t chunkx, int64_t chunky, int64_t chunkz)
 {
-    unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;  // location
-    unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
-    unsigned int z = blockIdx.z * blockDim.z + threadIdx.z;
+    int64_t x = blockIdx.x * blockDim.x + threadIdx.x;  // location
+    int64_t y = blockIdx.y * blockDim.y + threadIdx.y;
+    int64_t z = blockIdx.z * blockDim.z + threadIdx.z;
 
-    blockids[bindex(x, y, z)] = ((2*(x + z - 16) < (y + chunky)) || (2*(16 - x + z) < (y + chunky))) ? 0 : 7;
+    blockids[bindex(x, y, z)] = (((sin(0.1 * (x + chunkx)) + 1) * abs(x - 8)  + (cos(0.1 * (z + chunkz)) + 1) * abs(z - 8) < (y + chunky) / 2)) ? 0 : 7;
 }
 
 

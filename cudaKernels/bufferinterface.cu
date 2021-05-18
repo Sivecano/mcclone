@@ -8,6 +8,7 @@
 #include "stdio.h"
 #include <vector>
 #include <utility>
+#include <string>
 
 std::vector<std::pair<unsigned int, cudaGraphicsResource_t>> buffers;
 
@@ -15,7 +16,7 @@ __device__ inline unsigned int bindex(unsigned int x, unsigned int y, unsigned i
 {
     return x + 16 * z + 256 * y;
 }
-
+//TODO: implement using the remaining two bytes as cross so we can have flowers and shit
 /**
  * calculate which faces within the chunk need to be drawn
  *    _______
@@ -42,7 +43,7 @@ __device__ inline unsigned int bindex(unsigned int x, unsigned int y, unsigned i
  */
 __global__ void calculate_cube_facemask(uint8_t* data)
 {
-    uint8_t out = 0xff;
+    uint8_t out = 0x3f;
     unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;  // location
     unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
     unsigned int z = blockIdx.z * blockDim.z + threadIdx.z;
@@ -69,8 +70,11 @@ __global__ void calculate_cube_facemask(uint8_t* data)
 
 
 void cudainit() {
-    if (cudaSetDevice(0) != cudaSuccess) {
-        throw std::runtime_error("cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
+
+    printf("error: %s\n", cudaGetErrorString(cudaGetLastError()));
+    cudaError_t err = cudaSetDevice(0);
+    if (err != cudaSuccess) {
+        throw std::runtime_error(std::string("cudaSetDevice failed!  ") + std::string(cudaGetErrorString(err)));
     }
 }
 
@@ -128,3 +132,7 @@ void cube_facemask(unsigned int blockbuffer)
     if (err != CUDA_SUCCESS)
         printf("we fucked up majorly in facemask kernel: %s\n", cudaGetErrorString(err));
 }
+
+//void cube_facemask(Chunksystem world, glm::ivec3 chunkpos) {
+
+//}
