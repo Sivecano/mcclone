@@ -105,15 +105,14 @@ int main()
                     playcam.zoom += e.wheel.y / 100.f;
                     break;
 
-                case SDL_MOUSEBUTTONDOWN:
-                    if (e.button.button == SDL_BUTTON_LEFT)
-                        world.setBlock(raycast_pos(playcam.position, playcam.direction, world), 2);
+                case SDL_MOUSEBUTTONUP:
+                    if (e.button.button == SDL_BUTTON_LEFT) {
+                        glm::ivec3 ppp = raycast_block(playcam.position, playcam.direction, &world, 10.);
+                        SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "adl");
+                        world.setBlock(ppp, 2);
+                    }
                     break;
-
-
             };
-
-
         }
 
         float speed = (2 * keystate[SDL_SCANCODE_LCTRL] + 1) * (ctime - last) * 0.02f;

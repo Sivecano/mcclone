@@ -13,7 +13,7 @@ class Player {
 };
 
 
-glm::ivec3 raycast_pos(glm::vec3 direction, glm::vec3 start, ChunkSystem world);
+glm::ivec3 raycast_block(glm::vec3 direction, glm::vec3 start, ChunkSystem* world, float maxrange);
 
 
 

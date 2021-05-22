@@ -16,7 +16,7 @@ inline float dtoi(float in, bool dir)
         return floorf(in) - in;
 }
 
-float raycast_distance(glm::vec3 from, glm::vec3 direction, ChunkSystem world, float maxrange)
+float raycast_distance(glm::vec3 from, glm::vec3 direction, ChunkSystem* world, float maxrange)
 {
     direction = glm::normalize(direction);
 
@@ -28,18 +28,20 @@ float raycast_distance(glm::vec3 from, glm::vec3 direction, ChunkSystem world, f
 
     curr += direction * (dtoi(curr.x, direction.x > 0) / direction.x);
 
-    while (dist < maxrange || world.getBlock(glm::ivec3(glm::round(curr))) > 0)
+    while (dist < maxrange || world->getBlock(glm::ivec3(glm::round(curr))) > 0)
     {
         curr += direction * dd;
 
         dist = glm::length(curr - from);
-        SDL_Log("dist: %f", dist);
     }
+    SDL_Log("dist: %f", dist);
 
     return dist;
 }
 
-inline glm::ivec3 raycast_block(glm::vec3 from, glm::vec3 direction, ChunkSystem world, float maxrange)
+glm::ivec3 raycast_block(glm::vec3 from, glm::vec3 direction, ChunkSystem* world, float maxrange)
 {
-    return glm::ivec3(glm::round(from + glm::normalize(direction) * raycast_distance(from, direction, world, maxrange)));
+    float a = raycast_distance(from, direction, world, maxrange);
+    SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "ASDJSKA");
+    return glm::ivec3(glm::round(from + glm::normalize(direction) * a));
 }

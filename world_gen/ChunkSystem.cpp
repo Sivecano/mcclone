@@ -5,6 +5,7 @@
 #include "ChunkSystem.h"
 #include "worldgen.cuh"
 #include "bufferinterface.cuh"
+#include "SDL2/SDL.h"
 
 inline unsigned int bindex(unsigned int x, unsigned int y, unsigned int z)
 {
