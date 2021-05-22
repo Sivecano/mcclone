@@ -4,8 +4,8 @@
 #include "shaders.h"
 #include "rendering.h"
 #include "Camera.h"
-#include "Entities/Player.h"
 #include "ChunkSystem.h"
+#include "Entities/Player.h"
 #include "glm/glm.hpp"
 
 #define WIDTH 1280
