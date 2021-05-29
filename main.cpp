@@ -6,6 +6,7 @@
 #include "ChunkSystem.h"
 #include "Entities/Player.h"
 #include "glm/glm.hpp"
+#include "UI.h"
 
 #define WIDTH 1280
 #define HEIGHT 720
@@ -147,9 +148,9 @@ int main()
                             (speed * (keystate[SDL_SCANCODE_W] - keystate[SDL_SCANCODE_S]));
 
 
-        playcam.FOV += 0.01 * (keystate[SDL_SCANCODE_E] - keystate[SDL_SCANCODE_Q]);
-        playcam.FOV = fmin(3.14159, playcam.FOV);
-        playcam.FOV = fmax(0.1, playcam.FOV);
+        playcam.FOV += 0.01f * (keystate[SDL_SCANCODE_E] - keystate[SDL_SCANCODE_Q]);
+        playcam.FOV = fmin(3.14159f, playcam.FOV);
+        playcam.FOV = fmax(0.1f, playcam.FOV);
 
         //SDL_Log("x: %f, y: %f, z: %f, fov: %f", playcam.position.x, playcam.position.y, playcam.position.z, playcam.FOV);
 

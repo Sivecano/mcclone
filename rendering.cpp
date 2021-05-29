@@ -58,9 +58,9 @@ void render_init(SDL_Window* win)
     glEnable(GL_DEPTH_TEST);
     glClearColor(.6f, .6f, 1.0f, 1.0f);
 
-    block_shader = shader_program("shaders/vertexshader.vert.glsl",
-                                  "shaders/fragmentshader.frag.glsl",
-                                  "shaders/geometryshader.geo.glsl");
+    block_shader = shader_program("shaders/chunkshader.vert.glsl",
+                                  "shaders/chunkshader.frag.glsl",
+                                  "shaders/chunkshader.geo.glsl");
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
