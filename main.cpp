@@ -1,7 +1,6 @@
 #include "GL/glew.h"
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
-#include "shaders.h"
 #include "rendering.h"
 #include "Camera.h"
 #include "ChunkSystem.h"
@@ -13,6 +12,7 @@
 
 Camera playcam;
 const uint8_t* keystate = SDL_GetKeyboardState(NULL);
+uint8_t hand = 1;
 
 int main()
 {
@@ -30,7 +30,6 @@ int main()
         return 1;
     }
 
-
     win = SDL_CreateWindow("opengl with SDL2 :)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, SDL_WINDOW_OPENGL);
 
     if (win == NULL)
@@ -41,7 +40,6 @@ int main()
     }
 
     ChunkSystem world;
-
 
     render_init(win);
     playcam.pitch = 0;
@@ -81,8 +79,20 @@ int main()
                     break;
 
                 case SDL_KEYUP:
-                    if (e.key.keysym.sym == SDLK_ESCAPE)
-                        SDL_SetRelativeMouseMode((SDL_GetRelativeMouseMode() == SDL_TRUE) ? SDL_FALSE : SDL_TRUE);
+                    switch(e.key.keysym.sym)
+                    {
+                        case SDLK_ESCAPE:
+                            SDL_SetRelativeMouseMode((SDL_GetRelativeMouseMode() == SDL_TRUE) ? SDL_FALSE : SDL_TRUE);
+                        break;
+
+                        case SDLK_UP:
+                            if (hand < 7)hand++;
+                        break;
+
+                        case SDLK_DOWN:
+                            if (hand > 1) hand--;
+                        break;
+                    }
                     break;
 
                 case SDL_MOUSEMOTION:
@@ -106,11 +116,22 @@ int main()
                     break;
 
                 case SDL_MOUSEBUTTONUP:
-                    if (e.button.button == SDL_BUTTON_LEFT) {
-                        glm::ivec3 ppp = raycast_block(playcam.position, playcam.direction, &world, 10.);
-                        SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "adl");
-                        world.setBlock(ppp, 2);
-                    }
+                    float dist = raycast_distance(playcam.position, playcam.direction, &world, 20.);
+                    if (dist < 20)
+                        switch(e.button.button)
+                        {
+                            case SDL_BUTTON_RIGHT:
+                                SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "adl");
+                                world.setBlock(glm::round(playcam.position + playcam.direction * (dist - 1)), hand);
+                            break;
+
+                            case SDL_BUTTON_LEFT:
+                                world.setBlock(glm::round(playcam.position + playcam.direction * (dist)), 0);
+                            break;
+
+                            default:
+                                break;
+                        }
                     break;
             };
         }

@@ -6,15 +6,19 @@
 #include "worldgen.cuh"
 #include "bufferinterface.cuh"
 #include "SDL2/SDL.h"
+#include "glm/glm.hpp"
 
 inline unsigned int bindex(unsigned int x, unsigned int y, unsigned int z)
 {
+    if (x > 16 || x < 0) SDL_Log("x out of bounds: %i", x);
+    if (y > 16 || y < 0) SDL_Log("y out of bounds: %i", y);
+    if (z > 16 || z < 0) SDL_Log("z out of bounds: %i", z);
     return x + 16 * z + 256 * y;
 }
 
-inline unsigned int bindex(glm::ivec3 pos)
+inline unsigned int bindex(glm::u8vec3 pos)
 {
-    return pos.x + 16 * pos.z + 256 * pos.y;
+    return bindex(pos.x, pos.y, pos.z);
 }
 
 
@@ -47,9 +51,10 @@ Chunk *ChunkSystem::getChunk(glm::ivec3 chunkpos) {
         if (chunk->chunkpos == chunkpos)
             return chunk;
 
+    SDL_Log("generating");
     chunks.push_back(generateChunk(chunkpos));
 
-    return chunks.back();
+    return &(*chunks.back());
 }
 
 
@@ -59,16 +64,20 @@ ChunkSystem::~ChunkSystem() {
 
     chunks.clear();
 }
-
+///TODO: fix this this is the broken thing
 uint8_t ChunkSystem::getBlock(glm::ivec3 blockpos) {
-    return getChunk(glm::ivec3(blockpos / 16))->blockids[bindex(blockpos % 16)];
+    SDL_Log("getting block");
+    glm::ivec3 chunkpos = glm::floor(glm::vec3(blockpos) / 16.f);
+    return getChunk(chunkpos)->blockids[bindex(blockpos - chunkpos * 16)];
 }
 
 void ChunkSystem::setBlock(glm::ivec3 blockpos, uint8_t type) {
-    getChunk(glm::ivec3(blockpos / 16))->blockids[bindex(blockpos % 16)] = type;
+    glm::ivec3 chunkpos = glm::floor(glm::vec3(blockpos) / 16.f);
+    getChunk(chunkpos)->blockids[bindex(blockpos - chunkpos * 16)] = type;
 }
 
 void update_Buffer(Chunk *chunk) {
     glNamedBufferSubData(chunk->buffer, 0, 4096, chunk->blockids);
+    cube_facemask(chunk->buffer);
     cube_facemask(chunk->buffer);
 }

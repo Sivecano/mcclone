@@ -18,7 +18,6 @@ objs = 	main.o \
 
 all: $(objs) Makefile
 	$(compiler) $(objs) -o build/$(outfile) $(linkflags) -v
-	make oclean
 
  
 run : compile
