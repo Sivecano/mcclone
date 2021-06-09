@@ -7,9 +7,6 @@
 #include "stdint.h"
 #include "glm/vec3.hpp"
 
-
-
 void generate_chunkids(uint8_t* chunkids, glm::ivec3 chunkpos);
-
 
 #endif //MCCLONE_WORLDGEN_CUH

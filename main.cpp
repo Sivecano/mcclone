@@ -40,6 +40,8 @@ int main()
         exit(1);
     }
 
+
+
     ChunkSystem world;
 
     render_init(win);
@@ -49,6 +51,9 @@ int main()
     playcam.position = glm::vec3(0,0,-1);
     playcam.FOV = 0.1;
     playcam.zoom = 1;
+    UI ui;
+    ui.addUIElement(new ImageElement("textures/crossair.png", -.1, -.1, .2, .2));
+
 /*
     Chunk* basechunk = world.getChunk(glm::ivec3(0,0,0));
 
@@ -161,6 +166,7 @@ int main()
                 for (int k = -4; k < 4; k++)
                     renderChunk(playcam, world.getChunk(glm::ivec3(i + floor(playcam.position.x / 16), k + floor(playcam.position.y / 16), j + floor(playcam.position.z / 16))));
 
+        //ui.render();
         SDL_GL_SwapWindow(win);
         last = ctime;
 

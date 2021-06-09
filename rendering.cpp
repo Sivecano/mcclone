@@ -157,9 +157,6 @@ void renderChunk(Camera cam, Chunk* chunk)
     glVertexAttribIPointer(posAttrib, 1, GL_UNSIGNED_BYTE, 0, NULL);
 
     posAttrib = glGetAttribLocation(block_shader, "ffacemask");
-    glEnableVertexAttribArray(posAttrib);
-    glVertexAttribIPointer(posAttrib, 1, GL_UNSIGNED_BYTE, 0, (void*)4096);
-    glDrawArrays(GL_POINTS, 0, 4096);
 }
 
 

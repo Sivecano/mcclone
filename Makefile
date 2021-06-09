@@ -15,12 +15,12 @@ objs = 	main.o \
 		cudaKernels/worldgen.o \
 		world_gen/ChunkSystem.o \
 		Entities/Player.o \
+		gl_util/UI.o \
 
 all: $(objs) Makefile
 	$(compiler) $(objs) -o build/$(outfile) $(linkflags) -v
 
- 
-run : compile
+run : all
 	(cd build && exec ./$(outfile))
 
 build:

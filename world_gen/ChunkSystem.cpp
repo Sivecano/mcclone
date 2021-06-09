@@ -64,7 +64,7 @@ ChunkSystem::~ChunkSystem() {
 
     chunks.clear();
 }
-///TODO: fix this this is the broken thing
+///TODO: get a better raytracing algorithm going
 uint8_t ChunkSystem::getBlock(glm::ivec3 blockpos) {
     SDL_Log("getting block");
     glm::ivec3 chunkpos = glm::floor(glm::vec3(blockpos) / 16.f);
