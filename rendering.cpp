@@ -138,6 +138,7 @@ void render(SDL_Window* win)
 
 void renderChunk(Camera cam, Chunk* chunk)
 {
+    glBindTexture(GL_TEXTURE_2D, block_texture_atlas);
     glUseProgram(block_shader);
     glUniform3f(glGetUniformLocation(block_shader, "chunkpos"), chunk->chunkpos.x, chunk->chunkpos.y, chunk->chunkpos.z);
     glUniform3f(glGetUniformLocation(block_shader, "campos"), cam.position.x, cam.position.y, cam.position.z);
@@ -157,6 +158,10 @@ void renderChunk(Camera cam, Chunk* chunk)
     glVertexAttribIPointer(posAttrib, 1, GL_UNSIGNED_BYTE, 0, NULL);
 
     posAttrib = glGetAttribLocation(block_shader, "ffacemask");
+    glEnableVertexAttribArray(posAttrib);
+    glVertexAttribIPointer(posAttrib, 1, GL_UNSIGNED_BYTE, 0, (void*)4096);
+    glDrawArrays(GL_POINTS, 0, 4096);
+
 }
 
 
