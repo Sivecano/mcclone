@@ -6,7 +6,7 @@
 #include "SDL2/SDL_image.h"
 #include "ChunkSystem.h"
 #include "Camera.h"
-#include "cudaKernels/kernels.cuh"
+#include "cudaKernels/bufferinterface.cuh"
 
 SDL_GLContext con;
 int width;
@@ -58,9 +58,9 @@ void render_init(SDL_Window* win)
     glEnable(GL_DEPTH_TEST);
     glClearColor(.6f, .6f, 1.0f, 1.0f);
 
-    block_shader = shader_program("shaders/vertexshader.vert.glsl",
-                                  "shaders/fragmentshader.frag.glsl",
-                                  "shaders/geometryshader.geo.glsl");
+    block_shader = shader_program("shaders/chunkshader.vert.glsl",
+                                  "shaders/chunkshader.frag.glsl",
+                                  "shaders/chunkshader.geo.glsl");
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -107,11 +107,11 @@ void render_init(SDL_Window* win)
     glVertexAttribIPointer(posAttrib, 1, GL_UNSIGNED_BYTE, 0, (void*)4096);
 
     cudainit();
-    register_blockbuffer(block_buffer);
+    register_buffer(block_buffer);
 }
 
 void render_quit() {
-    unregister_blockbuffer();
+    unregister_buffer(block_buffer);
     SDL_GL_DeleteContext(con);
 }
 
@@ -125,7 +125,7 @@ void render(SDL_Window* win)
     glUniform3f(glGetUniformLocation(block_shader, "chunkpos"), -1, .5, 0.7);
     glUniform1i(glGetUniformLocation(block_shader, "time"), SDL_GetTicks());
 
-    cube_facemask();
+    cube_facemask(block_buffer);
     glUseProgram(block_shader);
     glBindBuffer(GL_ARRAY_BUFFER, block_buffer);
     glBindVertexArray(vertex_array);
@@ -136,22 +136,31 @@ void render(SDL_Window* win)
     SDL_GL_SwapWindow(win);
 }
 
-void renderChunk(Camera cam, Chunk chunk)
+void renderChunk(Camera cam, Chunk* chunk)
 {
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glBindTexture(GL_TEXTURE_2D, block_texture_atlas);
     glUseProgram(block_shader);
-    glUniform3f(glGetUniformLocation(block_shader, "chunkpos"), chunk.chunkpos.x, chunk.chunkpos.y, chunk.chunkpos.z);
+    glUniform3f(glGetUniformLocation(block_shader, "chunkpos"), chunk->chunkpos.x, chunk->chunkpos.y, chunk->chunkpos.z);
     glUniform3f(glGetUniformLocation(block_shader, "campos"), cam.position.x, cam.position.y, cam.position.z);
-    glUniform3f(glGetUniformLocation(block_shader, "camdir"), cam.direction.x, cam.direction.y, cam.direction.z);
-    glUniform1i(glGetUniformLocation(block_shader, "time"), SDL_GetTicks());
+    glUniform3f(glGetUniformLocation(block_shader, "camdir"), cos(cam.pitch) * cos(cam.yaw), sin(cam.pitch), sin(cam.yaw) * cos(cam.pitch));
+    glUniform1f(glGetUniformLocation(block_shader, "fov"), cam.FOV);
+    glUniform1f(glGetUniformLocation(block_shader, "zoom"), cam.zoom);
+    glUniform1f(glGetUniformLocation(block_shader, "pitch"), cam.pitch);
+    glUniform1f(glGetUniformLocation(block_shader, "yaw"), cam.yaw);
     glBindVertexArray(vertex_array);
-    glBindBuffer(GL_ARRAY_BUFFER, block_buffer);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, 4096, chunk.blockids);
-    cube_facemask();
-    glDrawArrays(GL_POINTS, 0, 4096);
-    //glVertexAttribPointer()
+    glBindBuffer(GL_ARRAY_BUFFER, chunk->buffer);
 
+    glBufferSubData(GL_ARRAY_BUFFER, 0, 4096, chunk->blockids);
+    cube_facemask(chunk->buffer);
+
+    GLint posAttrib = glGetAttribLocation(block_shader, "ftype");
+    glEnableVertexAttribArray(posAttrib);
+    glVertexAttribIPointer(posAttrib, 1, GL_UNSIGNED_BYTE, 0, NULL);
+
+    posAttrib = glGetAttribLocation(block_shader, "ffacemask");
+    glEnableVertexAttribArray(posAttrib);
+    glVertexAttribIPointer(posAttrib, 1, GL_UNSIGNED_BYTE, 0, (void*)4096);
+    glDrawArrays(GL_POINTS, 0, 4096);
 
 }
 
